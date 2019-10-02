@@ -76,11 +76,12 @@ function add_drive () {
 
   log_progress "Allocating ${size}K for $filename..."
   fallocate -l "$size"K "$filename"
-  echo "type=c" | sfdisk "$filename" > /dev/null
+  echo "type=83" | sfdisk "$filename" > /dev/null
   local partition_offset=$(first_partition_offset "$filename")
   losetup -o $partition_offset loop0 "$filename"
   log_progress "Creating filesystem with label '$label'"
-  mkfs.vfat /dev/loop0 -F 32 -n "$label"
+  mkfs.ext4 /dev/loop0
+  e2label /dev/loop0 "$label"
   losetup -d /dev/loop0
 
   local mountpoint=/mnt/"$name"
@@ -90,13 +91,14 @@ function add_drive () {
     mkdir "$mountpoint"
   fi
   sed -i "\@^$filename .*@d" /etc/fstab
-  echo "$filename $mountpoint vfat utf8,noauto,users,umask=000,offset=$partition_offset 0 0" >> /etc/fstab
+  echo "$filename $mountpoint ext4 utf8,noauto,users,umask=000,offset=$partition_offset 0 0" >> /etc/fstab
   log_progress "updated /etc/fstab for $mountpoint"
 }
 
 function create_teslacam_directory () {
   mount /mnt/cam
   mkdir /mnt/cam/TeslaCam
+  chmod 777 /mnt/cam/TeslaCam
   umount /mnt/cam
 }
 
