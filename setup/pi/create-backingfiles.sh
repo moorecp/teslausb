@@ -91,7 +91,7 @@ function add_drive () {
     mkdir "$mountpoint"
   fi
   sed -i "\@^$filename .*@d" /etc/fstab
-  echo "$filename $mountpoint ext4 utf8,noauto,users,umask=000,offset=$partition_offset 0 0" >> /etc/fstab
+  echo "$filename $mountpoint ext4 noauto,users,offset=$partition_offset 0 0" >> /etc/fstab
   log_progress "updated /etc/fstab for $mountpoint"
 }
 
